@@ -1,0 +1,58 @@
+# ---- Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+.env
+.env.*
+.venv/
+venv/
+env/
+
+# Builds / packages
+build/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+pip-log.txt
+MANIFEST
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Type checking / linters
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+.cache/
+
+# Django: configs locaux / données locales
+local_settings.py
+settings_local.py
+db.sqlite3
+
+# Fichiers générés par Django (ne pas versionner)
+# -> STATIC_ROOT (ex: 'staticfiles/') et uploads
+staticfiles/
+staticroot/
+mediafiles/
+mediaroot/
+# Logs & temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+.sass-cache/
