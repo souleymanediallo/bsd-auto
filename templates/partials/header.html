@@ -1,0 +1,41 @@
+
+<header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top bg-light">
+        <div class="container">
+            <a class="navbar-brand text-uppercase fw-bold" href="#">covoiturage.sn</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="#">Trajets Ponctuels</a>
+                    </li>
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="#">Domicile-Travail</a>
+                    </li>
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="#">Publier un trajet</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="{% url 'logout' %}">Déconnexion</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="{% url 'register' %}">Inscription</a>
+                    </li>
+                    <li class="nav-item fw-bold">
+                        <a class="nav-link text-uppercase fw-bold" href="{% url 'login' %}">Connexion</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
