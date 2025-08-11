@@ -1,35 +1,24 @@
 {% extends "layout.html" %}
-
+{% load static %}
 {% block content %}
-<!-- **************** MAIN CONTENT START **************** -->
-<main>
-    <section class="pt-4 pt-md-5 pb-0 py-5 bg-primary text-light">
-        <div class="container py-5">
-            <div class="row">
-                <div class="col-12 mx-auto text-center">
-                    <h1 class="fs-2 mb-2 text-light">Inscription</h1>
-                    <p class="mb-0">Créer un compte pour publier un trajet ou contacter un membre</p>
-                </div>
+
+    <!-- Page content -->
+    <main class="content-wrapper w-100 px-3 ps-lg-5 pe-lg-4 mx-auto" style="max-width: 1920px; background-color: #f8f9fa;">
+        <!-- Page title -->
+        <div class="row pt-5 pb-4">
+            <div class="col-12 text-center">
+                <h1 class="h2 mb-0">Inscription</h1>
             </div>
         </div>
-    </section>
-    <!-- ======================= Main Content START ======================= -->
-    <section class="py-5j">
-        <div class="container py-5j">
-            <div class="row justify-content-center align-items-center m-auto">
-                <div class="col-lg-8">
-                    <div class="card border">
-                        <div class="card-header bg-primary rounded-0 text-center">
-                        <h4 class="text-light">Inscription</h4>
-                    </div>
-                        <div class="card-body">
-                            <!-- Form START -->
-                            <form class="text-start" method="POST">
-                                {% csrf_token %}
-                                <!-- Firstname -->
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-									<label class="form-label">Vous êtes ? <span class="text-danger">*</span></label>
+
+        <!-- Form -->
+      <div class="row pb-5 justify-content-center">
+        <div class="col-md-4">
+          <!-- Form -->
+          <form class="needs-validation" novalidate="" method="POST">
+            {% csrf_token %}
+               <div class="position-relative mb-4">
+              <label class="form-label">Vous êtes ? <span class="text-danger">*</span></label>
                                         {% for sexe in form.user_type %}
 									<div class="d-flex gap-4">
 										<div class="form-check radio-bg-light">
@@ -37,64 +26,52 @@
 										</div>
                                         {% endfor %}
 									</div>
-								</div>
-                                </div>
-
-                                <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Prénom</label>
-                                    {{ form.first_name }}
-                                </div>
-                                <!-- Firstname -->
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Nom</label>
-                                    {{ form.last_name }}
-                                </div>
-                                    </div>
-                                <!-- Email -->
-                                <!-- Email -->
-                                <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Email</label>
-                                    {{ form.email }}
-                                </div>
-                                    <div class="col-lg-6 mb-3">
-                                    <label class="form-label">Téléphone</label>
-                                    {{ form.phone_number }}
-                                </div>
-                                </div>
-                                <!-- Password -->
-                                <div class="row">
-                                <div class="col-lg-6 mb-3 position-relative">
-                                    <label class="form-label">Mot de passe</label>
-                                    {{ form.password1 }}
-                                    <span class="text-sm mt-3">Majuscule, minuscule, chiffre</span>
-                                </div>
-                                <!-- Confirm Password -->
-                                <div class="col-lg-6 mb-3 position-relative">
-                                    <label class="form-label">Confirmer Mot de passe</label>
-                                    {{ form.password2 }}
-                                </div>
-                            </div>
-                                <div>
-                                    <button type="submit" class="btn btn-dark w-100 mb-0 rounded-0">Enregistrer</button>
-                                </div>
-                            </form>
-
-                        </div>
-
-                    </div>
-                    <div class="card-footer bg-primary text-center rounded-0">
-                            <p class="mb-0 text-light"> <span class="text">Vous avez déjà un compte ? <a href="{% url 'login' %}" class="text-light">Connectez-vous</a></span> </p>
-                        </div>
-                </div>
             </div>
-        </div>
-    </section>
-    <!-- =======================
-    Main Content END -->
+              <div class="position-relative my-4">
+              <label class="form-label">Prénom</label>
+                {{ form.first_name }}
+            </div>
+              <div class="position-relative mb-4">
+              <label class="form-label">Nom</label>
+                {{ form.last_name }}
+            </div>
+              <div class="position-relative mb-4">
+              <label class="form-label">Email</label>
+                {{ form.email }}
+            </div>
+              <div class="position-relative mb-4">
+              <label class="form-label">Votre numéro de téléphone</label>
+                {{ form.phone_number }}
+            </div>
+            <div class="mb-4">
+              <div class="password-toggle">
+                   <label class="form-label">Mot de passe</label>
+                                    {{ form.password1 }}
+                <div class="invalid-tooltip bg-transparent py-0">Majuscule, minuscule, chiffre</div>
 
-</main>
-<!-- **************** MAIN CONTENT END **************** -->
+              </div>
+            </div>
+              <div class="mb-4">
+              <div class="password-toggle">
+                   <label class="form-label">Confirm Votre Mot de passe</label>
+                                    {{ form.password2 }}
+                <div class="invalid-tooltip bg-transparent py-0">Majuscule, minuscule, chiffre</div>
+
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-lg btn-primary w-100">Enregistrer</button>
+          </form>
+          <div class="nav fs-sm mb-4">
+              Vous avez déjà un compte ?
+            <a class="nav-link text-decoration-underline p-0 ms-2" href="{% url 'login' %}">
+                Connectez-vous
+            </a>
+          </div>
+
+        </div>
+
+        </div>
+    </main>
 
 {% endblock %}

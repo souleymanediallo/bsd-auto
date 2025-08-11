@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     "phonenumber_field",
     'pages.apps.PagesConfig',
+    'cars.apps.CarsConfig',
 ]
 
 MIDDLEWARE = [

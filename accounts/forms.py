@@ -35,7 +35,7 @@ class CustomUserCreationForm(UserCreationForm):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
 
         for name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control', 'placeholder': self.placeholders[name]})
+            field.widget.attrs.update({'class': 'form-control form-control-lg', 'placeholder': self.placeholders[name]})
 
         self.fields['user_type'].widget.attrs.update({
             'class': 'form-check-input'

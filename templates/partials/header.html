@@ -18,7 +18,7 @@
         <!-- Navbar brand (Logo) -->
         <a
           class="navbar-brand me-2 me-sm-n4 me-md-n5 me-lg-0"
-          href="index.html"
+          href="{% url 'home' %}"
         >
           BSD AUTO
         </a>
@@ -31,7 +31,7 @@
           aria-labelledby="navbarNavLabel"
         >
           <div class="offcanvas-header py-3">
-            <h5 class="offcanvas-title" id="navbarNavLabel">BSD AUTO</h5>
+            <a href="{% url 'home' %}" class="offcanvas-title" id="navbarNavLabel">BSD AUTO</a>
             <button
               type="button"
               class="btn-close"
@@ -45,12 +45,24 @@
         <div class="d-flex gap-sm-1">
           <!-- Account button -->
           <ul class="navbar-nav position-relative">
+            {% if user.is_authenticated %}
               <li class="nav-item py-lg-2 me-lg-n2 me-xl-0">
-                <a class="nav-link" href="docs/installation.html">Insciption</a>
+                <a class="nav-link" href="#">Dashboard</a>
               </li>
               <li class="nav-item py-lg-2 me-lg-n2 me-xl-0">
-                <a class="nav-link" href="docs/typography.html">Connexion</a>
+                <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-link">Déconnexion</button>
+                </form>
               </li>
+            {% else %}
+            <li class="nav-item py-lg-2 me-lg-n2 me-xl-0">
+                <a class="nav-link" href="{% url 'register' %}">Insciption</a>
+              </li>
+              <li class="nav-item py-lg-2 me-lg-n2 me-xl-0">
+                <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>
