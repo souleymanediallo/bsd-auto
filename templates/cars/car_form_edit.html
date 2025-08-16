@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<main class="content-wrapper" style="max-width: 1920px; background-color: #f8f9fa;">
+  <div class="container pt-3 pt-sm-4 pt-md-5 pb-5">
+    <div class="row pt-lg-2 pt-xl-3 pb-1 pb-sm-2 pb-md-3 pb-lg-4 pb-xl-5">
+
+      <div class="col-lg-8 col-xl-9">
+        <h1 class="h2">
+          Modifier l’annonce
+        </h1>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+           {{ car_form.non_field_errors }}
+          {{ place_form.non_field_errors }}
+
+          {% if car_form.errors or place_form.errors or photo_formset.non_form_errors %}
+            <div class="alert alert-danger">
+              <strong>Veuillez corriger les erreurs ci-dessous.</strong>
+            </div>
+          {% endif %}
+
+          {# =================== PHOTOS (FORMSET) =================== #}
+          <section class="position-relative bg-body rounded p-4 mt-4">
+            <div class="position-relative z-1 pb-md-2 px-md-2">
+              <div class="d-sm-flex align-items-center justify-content-between mb-3 mb-sm-4">
+                <h2 class="h4 mb-2 mb-sm-0 me-3">Photos</h2>
+                <div class="position-relative d-flex">
+                  <i class="fi-info text-info mt-1 me-2"></i>
+                  <span class="fs-sm">Jusqu’à <strong>6 photos</strong>. Max 8 Mo par photo. Formats : jpg, jpeg, png.</span>
+                </div>
+              </div>
+
+              {% if photo_formset.non_form_errors %}
+                <div class="alert alert-danger py-2">{{ photo_formset.non_form_errors }}</div>
+              {% endif %}
+
+              {{ photo_formset.management_form }}
+
+              <div style="max-width: 852px">
+                <div id="photo-grid" class="row row-cols-2 row-cols-sm-3 g-2 g-md-4 g-lg-3 g-xl-4">
+
+                  {# Lignes existantes du formset #}
+                  {% for f in photo_formset.forms %}
+                  <div class="col photo-item">
+                    <div class="hover-effect-opacity position-relative overflow-hidden rounded p-2 bg-body-tertiary">
+                      {# IMPORTANT: id de la ligne (pour l’édition/suppression côté serveur) #}
+                      {{ f.id }}
+
+                      <div class="mb-2">
+                        {{ f.image.errors }}
+                        {{ f.image }}  {# input file uniquement #}
+                      </div>
+
+                      {# champs cachés: couverture, ordre, légende #}
+                      {{ f.is_cover }}
+                      {{ f.order }}
+                      {{ f.caption }}
+
+                      {% if f.instance.pk %}
+                        <div class="form-check mt-1">
+                          {{ f.DELETE }} <label class="form-check-label">Supprimer</label>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+
+                  {# bouton pour ajouter une ligne (géré par ton JS séparé) #}
+                  <div class="col">
+                    <button type="button" id="add-photo"
+                            class="d-flex align-items-center justify-content-center position-relative h-100 w-100 cursor-pointer bg-body-tertiary border border-2 border-dotted rounded p-3">
+                      <span class="text-center">
+                        <i class="fi-plus-circle fs-4 text-secondary-emphasis mb-2"></i>
+                        <span class="hover-effect-underline fs-sm fw-medium">Ajouter une photo</span>
+                      </span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark rounded d-none d-block-dark"></div>
+          </section>
+
+          {# =================== INFORMATIONS DE BASE =================== #}
+          <section class="position-relative bg-body rounded p-4 mt-4">
+            <div class="position-relative z-2 pb-md-2 px-md-2">
+              <h2 class="h4 mb-3 mb-sm-4">Informations de base</h2>
+
+              {% if car_form.non_field_errors %}
+                <div class="alert alert-danger py-2">{{ car_form.non_field_errors }}</div>
+              {% endif %}
+
+              <div class="mb-3">
+                <label class="form-label">Titre *</label>
+                {{ car_form.title }} {{ car_form.title.errors }}
+              </div>
+
+              <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 mb-3 mb-md-4">
+                <div class="col">
+                  <label class="form-label">Marque *</label>
+                  {{ car_form.brand }} {{ car_form.brand.errors }}
+                </div>
+                <div class="col">
+                  <label class="form-label">Année *</label>
+                  {{ car_form.year }} {{ car_form.year.errors }}
+                </div>
+              </div>
+
+              <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 mb-3 mb-md-4">
+                <div class="col">
+                  <label class="form-label">Carrosserie *</label>
+                  {{ car_form.body_type }} {{ car_form.body_type.errors }}
+                </div>
+                <div class="col">
+                  <label class="form-label">Kilométrage *</label>
+                  {{ car_form.mileage_km }} {{ car_form.mileage_km.errors }}
+                </div>
+              </div>
+
+
+              <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 mb-3 mb-md-4">
+                <div class="col">
+                  <label class="form-label">Carburant *</label>
+                  {{ car_form.fuel_type }} {{ car_form.fuel_type.errors }}
+                </div>
+                <div class="col">
+                  <label class="form-label">Boîte *</label>
+                  {{ car_form.transmission }} {{ car_form.transmission.errors }}
+                </div>
+              </div>
+
+                            <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 mb-3 mb-md-4">
+                  <div class="col">
+                      <label class="form-label">Places</label>
+                      {{ car_form.seats }} {{ car_form.seats.errors }}
+                    </div>
+                    <div class="col">
+                      <label class="form-label">Portes</label>
+                      {{ car_form.doors }} {{ car_form.doors.errors }}
+                    </div>
+                </div>
+
+
+
+              <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 mb-3 mb-md-4">
+                <div class="col-6">
+                  <label class="form-label">Couleur</label>
+                  {{ car_form.color }} {{ car_form.color.errors }}
+                </div>
+                <div class="col-6">
+                      <label class="form-label">Ville *</label>
+                      {{ car_form.place }} {{ car_form.place.errors }}
+                    </div>
+              </div>
+
+              <label class="form-label fs-6 fw-semibold">Description</label>
+              {{ car_form.description }} {{ car_form.description.errors }}
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark rounded d-none d-block-dark"></div>
+          </section>
+
+          {# =================== CARACTÉRISTIQUES =================== #}
+          <section class="position-relative bg-body rounded p-4 mt-4">
+            <div class="position-relative z-1 pb-md-2 px-md-2">
+              <h2 class="h4 mb-1 mb-sm-2">Caractéristiques</h2>
+
+              <div class="mb-3">
+                <label class="form-label">Options disponibles</label>
+
+                {% for sub in car_form.features %}
+                  <div class="form-check mb-1">
+                    {{ sub.tag }}
+                    <label class="form-check-label" for="{{ sub.id_for_label }}">
+                      {{ sub.choice_label }}
+                    </label>
+                  </div>
+                {% empty %}
+                  <p class="text-body-secondary">Aucune option disponible.</p>
+                {% endfor %}
+
+                {{ car_form.features.errors }}
+              </div>
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark rounded d-none d-block-dark"></div>
+          </section>
+
+          {# =================== PRIX =================== #}
+          <section class="position-relative bg-body rounded p-4 mt-4">
+            <div class="position-relative z-1 pb-md-2 px-md-2">
+              <h2 class="h4 mb-3 mb-sm-4">Tarif journalier</h2>
+              <label class="form-label">Prix / jour *</label>
+              <div class="mb-3 mb-md-4" style="max-width: 390px">
+                {{ car_form.daily_price }} {{ car_form.daily_price.errors }}
+              </div>
+              <div class="form-check">
+                {{ car_form.is_active }}
+                <label class="form-check-label">
+                  Mettre en à jour les informations de l'annonce
+                </label>
+              </div>
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark rounded d-none d-block-dark"></div>
+          </section>
+
+          {# =================== ACTIONS =================== #}
+          <section class="d-flex flex-column flex-sm-row justify-content-between gap-3 mt-4">
+            <button type="submit" class="btn btn-lg btn-primary">
+              <i class="fi-upload fs-lg ms-n1 me-2"></i>
+              {% if mode == "edit" %}Enregistrer les modifications{% else %}Enregistrer et publier{% endif %}
+            </button>
+          </section>
+        </form>
+      </div>
+
+      <aside class="col-lg-4 col-xl-3 mt-lg-n4">
+        <!-- zone de preview éventuelle -->
+      </aside>
+    </div>
+  </div>
+</main>
+
+{# ====== PROTOTYPE pour AJOUTER des PHOTOS (utilise empty_form, pas de REPLACE_*) ====== #}
+<template id="empty-photo-form">
+  <div class="col photo-item">
+    <div class="hover-effect-opacity position-relative overflow-hidden rounded p-2 bg-body-tertiary">
+      <div class="mb-2">
+        {{ photo_formset.empty_form.image }}
+      </div>
+      {{ photo_formset.empty_form.is_cover }}
+      {{ photo_formset.empty_form.order }}
+      {{ photo_formset.empty_form.caption }}
+    </div>
+  </div>
+</template>
+{% endblock %}

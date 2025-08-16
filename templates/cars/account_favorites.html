@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% load static humanize %}
+
+{% block title %}Mes favoris{% endblock %}
+
+{% block content %}
+<main class="content-wrapper" style="background-color: #f8f9fa;">
+  <div class="container pt-4 pt-sm-5 pb-5 mb-xxl-3">
+    <div class="row pt-2 pt-sm-0 pt-lg-2 pb-2 pb-sm-3 pb-md-4 pb-lg-5">
+
+
+      {% include "partials/sidebar-account.html" %}
+
+      <!-- Contenu : Mes favoris -->
+      <div class="col-lg-9">
+
+        <!-- Heading -->
+        <div class="d-flex align-items-center justify-content-between pb-2 pb-lg-3 mb-3">
+          <h1 class="h2 mb-0 me-3">Mes favoris{% if cars %} <span class="fs-5 text-body-secondary">({{ cars|length }})</span>{% endif %}</h1>
+        </div>
+
+        {% if cars %}
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 g-md-3 g-lg-4">
+
+            {% for car in cars %}
+            <div class="col">
+              <article class="card hover-effect-scale h-100">
+                <!-- Image -->
+                <div class="card-img-top position-relative bg-body-tertiary overflow-hidden" style="min-height:220px">
+                  <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 ps-1 mt-2 ms-2">
+                    {% if car.is_featured %}<span class="badge text-bg-info d-inline-flex align-items-center">Featured</span>{% endif %}
+                    <span class="badge text-bg-primary">Favori</span>
+                  </div>
+
+                  {# Bouton retirer des favoris #}
+                  <div class="position-absolute top-0 end-0 z-1 pt-1 pe-1 mt-2 me-2">
+                    <form method="post" action="{% url 'favorite_toggle' car.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle"
+                              title="Retirer des favoris">
+                        <i class="fi-heart-filled text-danger fs-sm"></i>
+                      </button>
+                    </form>
+                  </div>
+
+                  {% with cover=car.cover_photo %}
+                    {% if cover and cover.image %}
+                      <img src="{{ cover.image.url }}" class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="{{ car.title }}">
+                    {% else %}
+                      <img src="{% static 'assets/img/placeholders/car-16x9.jpg' %}" class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="{{ car.title }}">
+                    {% endif %}
+                  {% endwith %}
+                </div>
+
+                <!-- Infos -->
+                <div class="card-body pb-3">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="fs-xs text-body-secondary me-3">{{ car.created_at|date:"d/m/Y" }}</div>
+                    <div class="d-flex gap-2 position-relative z-2"></div>
+                  </div>
+
+                  <h3 class="h6 mb-2">
+                    <a class="hover-effect-underline stretched-link me-1" href="{{ car.get_absolute_url }}">{{ car.title }}</a>
+                    <span class="fs-xs fw-normal text-body-secondary">({{ car.year }})</span>
+                  </h3>
+
+                  <div class="h6 mb-0">{{ car.daily_price|intcomma }} F</div>
+                </div>
+
+                <!-- Caractéristiques -->
+                <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+                  <div class="d-flex flex-wrap justify-content-between gap-3 border-top fs-sm text-nowrap pt-3">
+                    <div class="d-flex align-items-center gap-2"><i class="fi-map-pin"></i> {{ car.place.city.name }}</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fi-tachometer"></i> {{ car.mileage_km|intcomma }} km</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fi-gas-pump"></i> {{ car.get_fuel_type_display }}</div>
+                    <div class="d-flex align-items-center gap-2"><i class="fi-gearbox"></i> {{ car.get_transmission_display }}</div>
+                  </div>
+                </div>
+              </article>
+            </div>
+            {% endfor %}
+
+          </div>
+        {% else %}
+          <div class="text-center text-body-secondary py-5">
+            <i class="fi-heart fs-1 d-block mb-3"></i>
+            <p class="mb-0">Vous n’avez encore aucun favori.</p>
+            <p>Parcourez les annonces et cliquez sur <i class="fi-heart"></i> pour les ajouter ici.</p>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

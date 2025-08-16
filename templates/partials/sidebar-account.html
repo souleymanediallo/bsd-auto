@@ -1,0 +1,54 @@
+{% load static %}
+<aside class="col-lg-3" style="margin-top: -105px">
+            <div class="offcanvas-lg offcanvas-start sticky-lg-top pe-lg-3 pe-xl-4" id="accountSidebar">
+              <div class="d-none d-lg-block" style="height: 105px"></div>
+
+              <!-- Header -->
+              <div class="offcanvas-header d-lg-block py-3 p-lg-0">
+                <div class="d-flex flex-row flex-lg-column align-items-center align-items-lg-start">
+                  <div class="flex-shrink-0 bg-body-secondary border rounded-circle overflow-hidden" style="width: 64px; height: 64px">
+                    <img src="{{ user.profile.image.url }}" alt="Avatar">
+                  </div>
+                  <div class="pt-lg-3 ps-3 ps-lg-0">
+                    <h6 class="mb-1">{{ user.first_name }} {{ user.last_name }}</h6>
+                    <p class="fs-sm mb-0">Membre depuis {{ user.date_joined|date }}</p>
+                  </div>
+                </div>
+                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#accountSidebar" aria-label="Close"></button>
+              </div>
+
+              <!-- Body (Navigation) -->
+              <div class="offcanvas-body d-block pt-2 pt-lg-4 pb-lg-0">
+                <nav class="list-group list-group-borderless">
+                  <a class="list-group-item list-group-item-action d-flex align-items-center" href="{% url 'account_profile' %}">
+                    <i class="fi-user fs-base opacity-75 me-2"></i>
+                    Mon profil
+                  </a>
+                  <a class="list-group-item list-group-item-action d-flex align-items-center active" aria-current="page" href="{% url 'account_list' %}">
+                    <i class="fi-layers fs-base opacity-75 me-2"></i>
+                    Ma voiture
+                  </a>
+                  <a class="list-group-item list-group-item-action d-flex align-items-center" href="{% url 'my_favorites' %}">
+                    <i class="fi-heart fs-base opacity-75 me-2"></i>
+                    Mes Favorits
+                  </a>
+                  <a class="list-group-item list-group-item-action d-flex align-items-center" href="{% url 'profile-update' %}">
+                    <i class="fi-settings fs-base opacity-75 me-2"></i>
+                    Modifier mon profile
+                  </a>
+                  <a class="list-group-item list-group-item-action d-flex align-items-center" href="#">
+                    <i class="fi-help-circle fs-base opacity-75 me-2"></i>
+                    Besoin d'aide ?
+                  </a>
+                </nav>
+                <nav class="list-group list-group-borderless pt-3">
+                  <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="list-group-item list-group-item-action d-flex align-items-center">
+                  <i class="fi-log-out fs-base opacity-75 me-2"></i> Déconnexion</button>
+                </form>
+
+                </nav>
+              </div>
+            </div>
+          </aside>

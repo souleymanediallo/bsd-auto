@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 from .models import (
     City, Place, Brand, CarModel,
-    Car, CarFeature, CarPhoto
+    Car, CarFeature, CarPhoto, Favorite
 )
 
 # ---------- Utilitaires d’affichage ----------
@@ -186,3 +186,14 @@ class CarPhotoAdmin(admin.ModelAdmin):
                 obj.image.url
             )
         return "—"
+
+# ---------- Favorite ----------
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("user", "car", "created_at")
+    search_fields = ("user__username", "car__title", "car__brand__name")
+    autocomplete_fields = ("user", "car")
+    ordering = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False

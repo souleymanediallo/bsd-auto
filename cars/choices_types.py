@@ -3,6 +3,24 @@ from django.utils.translation import gettext_lazy as _
 
 
 # Choices for car body types
+class CarSeat(models.TextChoices):
+    TWO = "2", _("2 places")
+    THREE = "3", _("3 places")
+    FOUR = "4", _("4 places")
+    FIVE = "5", _("5 places")
+    SIX = "6", _("6 places")
+    SEVEN = "7", _("7 places")
+    EIGHT = "8", _("8 places")
+    NINE = "9", _("9 places")
+
+
+class CarDoor(models.TextChoices):
+    TWO = "2", _("2 portes")
+    THREE = "3", _("3 portes")
+    FOUR = "4", _("4 portes")
+    FIVE = "5", _("5 portes")
+
+
 class BodyType(models.TextChoices):
     CITY_CAR = "city", _("Citadine")
     SEDAN = "sedan", _("Berline")
@@ -16,6 +34,24 @@ class BodyType(models.TextChoices):
     COUPE = "coupe", _("Coupé")
     CONVERTIBLE = "conv", _("Cabriolet")
     OTHER = "other", _("Autre")
+
+class CarYear(models.IntegerChoices):
+    YEAR_2024 = 2024, _("2024")
+    YEAR_2023 = 2023, _("2023")
+    YEAR_2022 = 2022, _("2022")
+    YEAR_2021 = 2021, _("2021")
+    YEAR_2020 = 2020, _("2020")
+    YEAR_2019 = 2019, _("2019")
+    YEAR_2018 = 2018, _("2018")
+    YEAR_2017 = 2017, _("2017")
+    YEAR_2016 = 2016, _("2016")
+    YEAR_2015 = 2015, _("2015")
+    YEAR_2014 = 2014, _("2014")
+    YEAR_2013 = 2013, _("2013")
+    YEAR_2012 = 2012, _("2012")
+    YEAR_2011 = 2011, _("2011")
+    YEAR_2010 = 2010, _("2010")
+    OTHER_YEAR = 9999, _("Autre année")  # For custom years
 
 
 # Choices for car fuel types

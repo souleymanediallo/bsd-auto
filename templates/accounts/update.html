@@ -1,126 +1,119 @@
 {% extends "layout.html" %}
-
+{% load static %}
 {% block content %}
-<main>
 
-<section class="pt-5">
-	<div class="container py-5">
-		<div class="row">
+<main class="content-wrapper">
+  <div class="container pt-4 pt-sm-5 pb-5 mb-xxl-3">
+    <div class="row pt-2 pt-sm-0 pt-lg-2 pb-2 pb-sm-3 pb-md-4 pb-lg-5">
 
-			<!-- Sidebar START -->
-            {% include "partials/sidebar-admin.html" %}
-			<!-- Sidebar END -->
+      {% include "partials/sidebar-account.html" %}
 
-			<!-- Main content START -->
-			<div class="col-lg-8 col-xl-9">
+      <div class="col-lg-9">
+        <h1 class="h2 pb-2 pb-lg-3">Modifier mes informations</h1>
 
-				<!-- Offcanvas menu button -->
-				<div class="d-grid mb-0 d-lg-none w-100">
-					<button class="btn btn-primary mb-4" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
-						<i class="fas fa-sliders-h"></i> Menu
-					</button>
-				</div>
-				<div class="vstack gap-4">
-					<!-- Personal info START -->
-					<div class="card border rounded-0">
-						<!-- Card header -->
-						<div class="card-header border-bottom bg-light rounded-0">
-							<h4 class="card-header-title">Profil et paramètres</h4>
-						</div>
-						<!-- Card body START -->
-						<div class="card-body">
-							<!-- Form START -->
-							<form class="row g-3" method="POST" enctype="multipart/form-data">
-                                {% csrf_token %}
-								<!-- Profile photo -->
-								<div class="col-12">
-									<label class="form-label">Ma photo de profil</label>
-									<div class="d-flex align-items-center">
-										<label class="position-relative me-4" for="uploadfile-1" title="Replace this pic">
-											<!-- Avatar place holder -->
-											<span class="avatar avatar-xl">
-												<img id="uploadfile-1-preview" class="avatar-img rounded-circle border border-white border-3 shadow" src="{{ p_form.instance.image.url }}" alt="">
-											</span>
-										</label>
-										<!-- Upload button -->
-										<label class="btn btn-sm btn-primary-soft mb-0" for="uploadfile-1"> Modifier </label>
-										<input id="uploadfile-1" class="form-control d-none" type="file">
-									</div>
-								</div>
+        <form class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
 
-								<!-- Name -->
-								<div class="col-md-6">
-									<label class="form-label">Prénom<span class="text-danger">*</span></label>
-									{{ u_form.first_name }}
-								</div>
+          <!-- Avatar -->
+          <div class="d-flex align-items-start align-items-sm-center mb-4">
+            <div class="ratio ratio-1x1 hover-effect-opacity bg-body-tertiary border rounded-circle overflow-hidden" style="width: 124px">
+              {% if p_form.instance and p_form.instance.image %}
+                <img id="avatar-preview" src="{{ p_form.instance.image.url }}" alt="Avatar"
+                     class="object-fit-cover w-100 h-100">
+              {% else %}
+                <img id="avatar-preview-1" src="{% static 'assets/img/account/avatar-lg.jpg' %}" alt="Avatar"
+                     class="object-fit-cover w-100 h-100">
+              {% endif %}
+              <div class="hover-effect-target position-absolute top-0 start-0 d-flex align-items-center justify-content-center w-100 h-100 opacity-0">
+                <!-- Optionnel: bouton supprimer -->
+                {# <button type="button" class="btn btn-icon btn-sm btn-light position-relative z-2" aria-label="Remove">
+                  <i class="fi-trash fs-base"></i>
+                </button> #}
+                <span class="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 z-1"></span>
+              </div>
+            </div>
 
-								<!-- Email -->
-								<div class="col-md-6">
-									<label class="form-label">Nom</label>
-									{{ u_form.last_name }}
-								</div>
+            <div class="ps-3 ps-sm-4">
+              <p class="fs-sm mb-2" style="max-width: 440px">
+                Photo PNG/JPG. Taille max conseillée 1000×1000px.
+              </p>
 
-								<!-- Mobile -->
-								<div class="col-md-6">
-									<label class="form-label">Numéro de téléphone<span class="text-danger">*</span></label>
-									{{ u_form.phone_number }}
-								</div>
+              <!-- Bouton qui déclenche l’input file -->
+              <label for="avatar-input" class="btn btn-sm btn-outline-secondary mb-0">
+                <i class="fi-refresh-ccw fs-sm ms-n1 me-2"></i> Modifier la photo
+              </label>
 
-								<!-- Gender -->
-								<div class="col-md-6">
-									<label class="form-label">Vous êtes ?</label>
-									<div class="d-flex gap-4">
-										{% for sexe in u_form.user_type %}
-										<div class="form-check radio-bg-light">
-											<label class="form-check-label">
-												{{ sexe }}
-											</label>
-										</div>
-										{% endfor %}
-									</div>
-								</div>
+              <!-- Input fichier (champ du formulaire) -->
+              <div class="d-none">
+                {{ p_form.image }}
+              </div>
+              {{ p_form.image.errors }}
+            </div>
+          </div>
 
-								<!-- Address -->
-								<div class="col-12">
-									<label class="form-label">Présentation</label>
-									{{ p_form.description }}
-								</div>
+          <!-- Champs utilisateur -->
+          <div class="row row-cols-1 row-cols-sm-2 g-4 mb-4">
+            <div class="col position-relative">
+              <label class="form-label fs-base">Prénom *</label>
+              {{ u_form.first_name }}
+              {{ u_form.first_name.errors }}
+            </div>
+            <div class="col position-relative">
+              <label class="form-label fs-base">Nom *</label>
+              {{ u_form.last_name }}
+              {{ u_form.last_name.errors }}
+            </div>
+            <div class="col position-relative">
+              <label class="form-label fs-base">Numéro de téléphone *</label>
+              {{ u_form.phone_number }}
+              {{ u_form.phone_number.errors }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fs-base d-block mb-2">Vous êtes ?</label>
+              <div class="d-flex gap-4">
+                {% for radio in u_form.user_type %}
+                  <div class="form-check radio-bg-light">
+                    <label class="form-check-label">{{ radio.tag }} {{ radio.choice_label }}</label>
+                  </div>
+                {% endfor %}
+              </div>
+              {{ u_form.user_type.errors }}
+            </div>
+          </div>
 
-								<!-- Button -->
-								<div class="col-12 text-end">
-                                    <button type="submit" class="btn btn-primary mb-0">Mettre à jour</button>
-								</div>
-							</form>
-							<!-- Form END -->
-						</div>
-						<!-- Card body END -->
-					</div>
-					<!-- Personal info END -->
-					<!-- delete account START -->
-					<div class="card border rounded-0">
-						<!-- Card header -->
-						<div class="card-header border-bottom bg-light rounded-0">
-							<h4 class="card-header-title">Supprimer mon compte</h4>
-						</div>
-						<!-- Card body START -->
-						<div class="card-body bg-light">
-							<p>
-								La suppression de compte est définitive. Vos données personnelles ainsi que vos trajets seront supprimées.
-								Voulez-vous vraiment supprimer votre compte ?
-							</p>
-							<!-- Form START -->
-							<a href="{% url 'delete' %}" class="btn btn-danger">Supprimer mon compte</a>
-							<!-- Form END -->
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- Main content END -->
-		</div>
-	</div>
-</section>
-<!-- =======================
-Content END -->
+          <!-- Description -->
+          <div class="mb-4">
+            <label class="form-label fs-base">Présentation</label>
+            {{ p_form.description }}
+            {{ p_form.description.errors }}
+          </div>
 
+          <div class="d-flex gap-3">
+            <a class="btn btn-lg btn-secondary" href="{% url 'account_profile' %}">Annuler</a>
+            <button type="submit" class="btn btn-lg btn-dark">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
 </main>
-{% endblock %}
+
+<!-- Aperçu live de la photo -->
+<script>
+  (function() {
+    const input = document.getElementById('{{ p_form.image.id_for_label }}');
+    const preview = document.getElementById('avatar-preview');
+    if (input && preview) {
+      input.addEventListener('change', function (e) {
+        const [file] = e.target.files || [];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          preview.src = url;
+        }
+      });
+    }
+  })();
+</script>
+
+{% endblock content %}

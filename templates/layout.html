@@ -27,6 +27,7 @@
   <!-- Bootstrap + Theme styles -->
   <link rel="preload" href="{% static 'assets/css/theme.min.css' %}" as="style" />
   <link rel="stylesheet" href="{% static 'assets/css/theme.min.css' %}" id="theme-styles" />
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 
   {% block extra_css %}{% endblock %}
   <script src="{% static 'assets/js/customizer.min.js' %}" defer></script>
@@ -49,6 +50,40 @@
 
   <!-- Bootstrap + Theme scripts -->
   <script src="{% static 'assets/js/theme.min.js' %}" defer></script>
+  <script src="{% static 'assets/js/script.js' %}"></script>
+
+
+ <script>
+(function () {
+  const MAX = 6;
+  const grid = document.getElementById('photo-grid');
+  const addBtn = document.getElementById('add-photo');
+  const totalInput = document.querySelector('input[name="{{ photo_formset.prefix }}-TOTAL_FORMS"]');
+
+  function activeItems(){ return [...grid.querySelectorAll('.photo-item')].filter(el => !el.querySelector('input[name$="-DELETE"]')?.checked); }
+  function ensureCover(){
+    const covers = activeItems().map(el => el.querySelector('input[name$="-is_cover"]'));
+    if (!covers.some(c => c && c.checked)) { const first = activeItems()[0]; if (first){ first.querySelector('input[name$="-is_cover"]').checked = true; } }
+  }
+  function renumber(){ activeItems().forEach((el,i)=>{ const o=el.querySelector('input[name$="-order"]'); if(o) o.value=i; }); }
+
+  ensureCover(); renumber();
+
+  addBtn?.addEventListener('click', () => {
+    if (activeItems().length >= MAX) { alert(`Maximum ${MAX} photos.`); return; }
+    const idx = parseInt(totalInput.value, 10);
+    const html = document.getElementById('empty-photo-form').innerHTML.replaceAll('__prefix__', idx);
+    const w = document.createElement('div'); w.innerHTML = html.trim();
+    grid.insertBefore(w.firstElementChild, addBtn.closest('.col'));
+    totalInput.value = idx + 1;
+    ensureCover(); renumber();
+  });
+
+  grid.addEventListener('change', e => {
+    if (e.target.name && e.target.name.endsWith('-DELETE')) { setTimeout(()=>{ ensureCover(); renumber(); },0); }
+  });
+})();
+</script>
 
   {% block extra_js %}{% endblock %}
 </body>

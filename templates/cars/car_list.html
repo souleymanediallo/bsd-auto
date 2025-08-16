@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% load static humanize %}
+{% block title %}Liste des voitures de location{% endblock %}
+{% block content %}
+
+<main class="content-wrapper">
+  <div class="container pt-4 pb-5 mb-xxl-3">
+
+    <!-- Breadcrumb -->
+    <nav class="pb-2" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Voitures</li>
+      </ol>
+    </nav>
+
+    <!-- Active filters (exemple statique pour l’instant) -->
+    <div class="d-flex align-items-center gap-3 border-bottom pb-2 mb-4">
+      <div class="fs-sm text-nowrap pb-3">
+        <span class="d-none d-md-inline">Affichage de</span>
+        {{ page_obj.paginator.count }} résultats
+      </div>
+      <div class="w-100 pb-3 overflow-x-auto">
+        <div class="d-flex gap-2">
+          {# Boutons filtres sélectionnés à venir #}
+        </div>
+      </div>
+      <div class="nav pb-3">
+        <a class="nav-link fs-xs text-decoration-underline text-nowrap p-0" href="{% url 'cars_list' %}">Réinitialiser</a>
+      </div>
+    </div>
+
+    <div class="row pt-md-2 pt-lg-3 pb-2 pb-sm-3 pb-md-4 pb-lg-5">
+
+      <!-- Sidebar filtres -->
+      {% include "partials/sidebar-car.html" %}
+
+      <!-- Listings grid -->
+      <div class="col-lg-9">
+
+        <!-- Sorting + View switcher (placeholder) -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3 pb-3 mb-2">
+          <div class="position-relative" style="width: 150px">
+            <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2"></i>
+            <select class="form-select border-0 rounded-0 ps-4 pe-1">
+              <option value="newest" selected>Nouveautés</option>
+              <option value="price_low">Prix ↑</option>
+              <option value="price_high">Prix ↓</option>
+            </select>
+          </div>
+          <div class="nav ms-auto">
+            <a class="nav-link fw-normal p-0" href="#!">
+              <i class="fi-repeat fs-base me-2"></i>
+              Comparer (0)
+            </a>
+          </div>
+          <div class="nav">
+            <a class="nav-link fs-xl text-body-secondary py-0 px-2 active pe-none" href="#" aria-label="Grille">
+              <i class="fi-grid"></i>
+            </a>
+            <a class="nav-link fs-xl text-body-secondary py-0 px-2" href="#" aria-label="Liste">
+              <i class="fi-list"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Grid dynamique -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-2 row-cols-xl-3 g-4 g-sm-3 g-lg-4">
+          {% for car in cars %}
+          <div class="col">
+            <article class="card h-100 hover-effect-scale bg-body-tertiary border-0">
+              <div class="card-img-top position-relative overflow-hidden">
+                <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 pt-sm-0 ps-1 ps-sm-0 mt-2 mt-sm-3 ms-2 ms-sm-3">
+                  {% if car.is_featured %}
+                    <span class="badge text-bg-info d-inline-flex align-items-center">
+                      À la une <i class="fi-shield ms-1"></i>
+                    </span>
+                  {% endif %}
+                  <span class="badge text-bg-warning">Voiture vérifiée</span>
+                </div>
+                <div class="ratio hover-effect-target bg-body-secondary" style="--fn-aspect-ratio: calc(204 / 306 * 100%)">
+                  {% with cover=car.cover_photo %}
+                    {% if cover and cover.image %}
+                      <img src="{{ cover.image.url }}" alt="{{ car.title }}" style="width:100%;height:100%;object-fit:cover;">
+                    {% else %}
+                      <img src="{% static 'assets/img/placeholders/car-16x9.jpg' %}" alt="{{ car.title }}" style="width:100%;height:100%;object-fit:cover;">
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </div>
+
+              <div class="card-body pb-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="fs-xs text-body-secondary me-3">{{ car.created_at|date:"d/m/Y" }}</div>
+                  <div class="d-flex gap-2 position-relative z-2">
+                    <!-- actions éventuelles -->
+                  </div>
+                </div>
+                <h3 class="h6 mb-2">
+                  <a class="hover-effect-underline stretched-link me-1" href="{{ car.get_absolute_url }}">
+                    {% if car.is_featured %}
+                      <i class="fi-star text-warning me-1"></i>
+                    {% endif %}
+                    {{ car.brand.name }} {{ car.model_name.name }}
+                  </a>
+                  <span class="fs-xs fw-normal text-body-secondary">({{ car.year }})</span>
+                </h3>
+                <div class="h6 mb-0">{{ car.daily_price|intcomma }} F</div>
+              </div>
+
+              <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+                <div class="border-top pt-3">
+                  <div class="row row-cols-2 g-2 fs-sm">
+                    <div class="col d-flex align-items-center gap-2">
+                      <i class="fi-map-pin"></i>
+                      {{ car.place.city.name }}
+                    </div>
+                    <div class="col d-flex align-items-center gap-2">
+                      <i class="fi-tachometer"></i>
+                      {{ car.mileage_km|intcomma }} km
+                    </div>
+                    <div class="col d-flex align-items-center gap-2">
+                      <i class="fi-gas-pump"></i>
+                      {{ car.get_fuel_type_display }}
+                    </div>
+                    <div class="col d-flex align-items-center gap-2">
+                      <i class="fi-gearbox"></i>
+                      {{ car.get_transmission_display }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+          {% empty %}
+            <p class="text-body-secondary">Aucune voiture disponible.</p>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav class="pt-3 mt-3" aria-label="Pagination">
+          <ul class="pagination pagination-lg">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if num == page_obj.number %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+              {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

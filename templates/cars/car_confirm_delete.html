@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block content %}
+<main class="content-wrapper">
+  <div class="container pt-3 pt-sm-4 pt-md-5 pb-5">
+    <div class="row pt-lg-2 pt-xl-3 pb-1 pb-sm-2 pb-md-3 pb-lg-4 pb-xl-5">
+
+      <!-- Sell car form -->
+      <div class="col-lg-8 col-xl-9">
+        <h1 class="h2">
+          Supprimer une voiture
+        </h1>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4 p-md-5">
+            <h1 class="h4 mb-3">{{ car.brand }} {{ car.model_name }} ({{ car.year }})</h1>
+            <p class="mb-4">
+              Voulez-vous vraiment supprimer l’annonce
+              <strong>{{ car.brand }} {{ car.model_name }} ({{ car.year }})</strong> ?
+              Cette action est <span class="text-danger fw-semibold">définitive</span>.
+            </p>
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="d-flex gap-2">
+                <a href="{{ car.get_absolute_url }}" class="btn btn-outline-secondary">Annuler</a>
+                <button type="submit" class="btn btn-danger">
+                  <i class="fi-trash me-2"></i> Supprimer définitivement
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- Preview sidebar (optionnel inchangé) -->
+      <aside class="col-lg-4 col-xl-3 mt-lg-n4">
+        <!-- … contenu de prévisualisation comme dans ton template … -->
+      </aside>
+    </div>
+  </div>
+</main>
+
+{# ====== TEMPLATE CACHÉ POUR AJOUTER DES PHOTOS (cloné en JS) ====== #}
+<template id="empty-photo-form">
+  <div class="col photo-item">
+    <div class="hover-effect-opacity position-relative overflow-hidden rounded p-2 bg-body-tertiary">
+      <div class="mb-2">
+        REPLACE_IMAGE
+      </div>
+      <div class="d-flex gap-2 align-items-center mb-2">
+        <div class="form-check">
+          REPLACE_COVER
+          <label class="form-check-label ms-1">Couverture</label>
+        </div>
+        <div class="ms-auto" style="width: 88px">
+          REPLACE_ORDER
+        </div>
+      </div>
+      <div class="mb-1">
+        REPLACE_CAPTION
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  // Ajout d’une ligne formset côté client
+  (function() {
+    const addBtn = document.getElementById('add-photo');
+    if (!addBtn) return;
+
+    addBtn.addEventListener('click', function() {
+      const totalInput = document.querySelector('#id_photos-TOTAL_FORMS') || document.querySelector('input[name$="TOTAL_FORMS"]');
+      const total = parseInt(totalInput.value, 10);
+      const tmpl = document.getElementById('empty-photo-form').content.cloneNode(true);
+
+      // on crée des inputs file / text / checkbox / number avec bons names
+      const img = document.createElement('input');
+      img.type = 'file';
+      img.name = `photos-${total}-image`;
+      img.id = `id_photos-${total}-image`;
+      img.className = 'form-control';
+      img.accept = 'image/*';
+
+      const caption = document.createElement('input');
+      caption.type = 'text';
+      caption.name = `photos-${total}-caption`;
+      caption.id = `id_photos-${total}-caption`;
+      caption.className = 'form-control form-control-sm';
+      caption.placeholder = 'Légende';
+
+      const cover = document.createElement('input');
+      cover.type = 'checkbox';
+      cover.name = `photos-${total}-is_cover`;
+      cover.id = `id_photos-${total}-is_cover`;
+      cover.className = 'form-check-input';
+
+      const order = document.createElement('input');
+      order.type = 'number';
+      order.name = `photos-${total}-order`;
+      order.id = `id_photos-${total}-order`;
+      order.className = 'form-control';
+      order.value = '0';
+      order.min = '0';
+
+      tmpl.querySelector('.mb-2').outerHTML = `<div class="mb-2"></div>`;
+      tmpl.querySelector('.mb-2').appendChild(img);
+
+      tmpl.querySelector('div.form-check')?.replaceChildren(cover);
+      tmpl.querySelector('[style*="width: 88px"]').replaceChildren(order);
+      tmpl.querySelector('.mb-1').replaceChildren(caption);
+
+      document.getElementById('photo-grid').insertBefore(tmpl, addBtn.closest('.col'));
+      totalInput.value = total + 1;
+    });
+  })();
+
+  // (Optionnel) MAJ dynamique du select "Modèle" quand "Marque" change
+  (function(){
+    const brand = document.getElementById('{{ car_form.brand.id_for_label }}');
+    const model = document.getElementById('{{ car_form.model_name.id_for_label }}');
+    if (!brand || !model) return;
+
+    brand.addEventListener('change', async () => {
+      const brandId = brand.value;
+      if (!brandId) return;
+      try {
+        // remplace '/cars/api/models/' par ton endpoint JSON si disponible
+        const r = await fetch(`/cars/api/models/?brand=${brandId}`);
+        if (!r.ok) return;
+        const data = await r.json(); // [{id:.., name:"…"}, …]
+        model.innerHTML = '<option value="">---------</option>';
+        data.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.id; opt.textContent = o.name;
+          model.appendChild(opt);
+        });
+      } catch(e) { /* silencieux */ }
+    });
+  })();
+</script>
+{% endblock %}

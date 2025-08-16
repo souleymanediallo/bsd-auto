@@ -29,4 +29,7 @@ urlpatterns = [
              template_name="accounts/password_reset_complete.html"
          ),
          name="password_reset_complete"),
+
+    path("mes-annonces", views.account_list, name="account_list"),
+    path("dashboard", views.account_profile, name="account_profile"),
 ]

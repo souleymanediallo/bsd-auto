@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
+    'django.contrib.humanize',
     "phonenumber_field",
     'pages.apps.PagesConfig',
     'cars.apps.CarsConfig',

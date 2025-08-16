@@ -1,8 +1,11 @@
+from django.db.models import Prefetch
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from cars.models import Car, CarPhoto
 
+from .models import Profile
 from .forms import CustomUserCreationForm, CustomUserUpdateForm, ProfileUpdateForm
 
 
@@ -57,7 +60,7 @@ def profile_update(request):
             p_form.save()
             first_name = u_form.cleaned_data.get("first_name")
             messages.success(request, f"{first_name}, votre compte a été mis à jour")
-            return redirect('dashboard')
+            return redirect('account_profile')
     else:
         u_form = CustomUserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
@@ -76,10 +79,48 @@ def delete_user(request):
 
     return render(request, "accounts/delete.html")
 
+@login_required
+def account_list(request):
+    user = request.user
+    last_cars = (
+        Car.objects
+        .filter(owner=user)
+        .select_related("brand", "model_name", "place__city")
+        .prefetch_related(
+            Prefetch(
+                "photos",
+                queryset=CarPhoto.objects.order_by("order", "id"),
+                to_attr="prefetched_photos"
+            )
+        )
+        .order_by("-created_at")[:3]
+    )
+    context = {"last_cars": last_cars}
+    return render(request, "accounts/account-list.html", context)
 
-# @login_required
-# def dashboard(request):
-#     trips = Trip.objects.filter(author=request.user)
-#     homeworks = Homework.objects.filter(author=request.user)
-#     context = {"trips": trips, "homeworks": homeworks}
-#     return render(request, 'accounts/dashboard.html', context)
+
+@login_required
+def account_profile(request):
+    user = request.user
+
+    profile = Profile.objects.filter(user=user).first()
+
+    last_cars = (
+        Car.objects
+        .filter(owner=user)
+        .select_related("brand", "model_name", "place__city")
+        .prefetch_related(
+            Prefetch(
+                "photos",
+                queryset=CarPhoto.objects.order_by("order", "id"),
+                to_attr="prefetched_photos"
+            )
+        )
+        .order_by("-created_at")[:3]
+    )
+
+    return render(request, "accounts/account-profile.html", {
+        "user_obj": user,
+        "profile": profile,
+        "last_cars": last_cars,
+    })

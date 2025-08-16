@@ -1,0 +1,190 @@
+<!-- Sidebar / Offcanvas -->
+<aside class="col-lg-3">
+  <div class="offcanvas offcanvas-start offcanvas-lg pe-lg-2 pe-xl-3 pe-xxl-4"
+       id="filterSidebar" tabindex="-1" data-bs-scroll="true" aria-labelledby="filterSidebarLabel">
+
+    <div class="offcanvas-header border-bottom py-3">
+      <h3 class="h5 offcanvas-title" id="filterSidebarLabel">Filters</h3>
+      <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas"
+              data-bs-target="#filterSidebar" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body d-block">
+
+      <!-- Condition -->
+      <ul class="nav nav-pills flex-sm-nowrap gap-2 text-nowrap pb-4 mb-2 mb-xl-3">
+        <li class="nav-item me-1">
+          <a class="nav-link" href="#!">New cars</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#!">Used cars</a>
+        </li>
+      </ul>
+
+      <!-- Location -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Location and radius</h4>
+        <div class="vstack gap-3">
+          <div class="position-relative">
+            <i class="fi-map-pin position-absolute top-50 start-0 translate-middle-y z-1 ms-3"></i>
+            <select class="form-select form-icon-start" data-select='{
+              "classNames":{"containerInner":["form-select","form-icon-start"]},
+              "searchEnabled":true
+            }' aria-label="Car location">
+              <option value="">Any location</option>
+              <option>Dakar</option>
+              <option>Thiès</option>
+              <option>Saint-Louis</option>
+            </select>
+          </div>
+          <div class="position-relative">
+            <i class="fi-navigation position-absolute top-50 start-0 translate-middle-y z-1 ms-3"></i>
+            <select class="form-select form-icon-start" data-select='{
+              "classNames":{"containerInner":["form-select","form-icon-start"]}
+            }' aria-label="Location radius">
+              <option value="">Any radius</option>
+              <option>5 km</option>
+              <option>10 km</option>
+              <option>20 km</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body type -->
+      <div class="pb-4 mb-5 mb-xl-3">
+        <h4 class="h6">Body type</h4>
+        <div data-simplebar data-simplebar-auto-hide="false">
+          <div class="d-flex flex-column gap-2 py-1">
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" id="sedan" checked>
+              <span class="form-check-label fs-sm">Sedan</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" id="suv" checked>
+              <span class="form-check-label fs-sm">SUV</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" id="coupe">
+              <span class="form-check-label fs-sm">Coupe</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" id="pickup">
+              <span class="form-check-label fs-sm">Pickup</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" id="mpv">
+              <span class="form-check-label fs-sm">Family MPV</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Year -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Year</h4>
+        <div class="d-flex align-items-center">
+          <div class="w-50">
+            <select class="form-select" aria-label="Year from">
+              <option value="">From</option>
+              <option>2025</option><option>2024</option><option>2023</option>
+              <option>2022</option><option>2021</option><option>2020</option>
+              <option>2019</option><option>2018</option><option>2017</option>
+            </select>
+          </div>
+          <i class="fi-minus mx-3 mx-lg-1 mx-xl-2 mx-xxl-3"></i>
+          <div class="w-50">
+            <select class="form-select" aria-label="Year to">
+              <option value="">To</option>
+              <option>2025</option><option selected>2023</option>
+              <option>2022</option><option>2021</option><option>2020</option>
+              <option>2019</option><option>2018</option><option>2017</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Make and model -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Make and model</h4>
+        <div class="vstack gap-3">
+          <select class="form-select" data-select='{"searchEnabled":true}' aria-label="Make">
+            <option value="">Any make</option>
+            <option>Toyota</option><option>Hyundai</option><option>Peugeot</option>
+          </select>
+          <select class="form-select" data-select='{"searchEnabled":true}' aria-label="Model">
+            <option value="">Any model</option>
+            <option>Corolla</option><option>Hilux</option><option>Yaris</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6 pb-2" id="headingPrice">Price</h4>
+        <div class="range-slider pb-1 mb-3"
+             data-range-slider='{"startMin":15000,"startMax":100000,"min":10000,"max":100000,"step":5000,"tooltipSuffix":" F"}'
+             aria-labelledby="headingPrice">
+          <div class="range-slider-ui"></div>
+          <div class="d-flex align-items-center">
+            <div class="position-relative w-50">
+              <i class="fi-dollar-sign position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <input type="number" class="form-control form-icon-start" min="10000" max="100000" step="5000"
+                     data-range-slider-min>
+            </div>
+            <i class="fi-minus text-body-emphasis mx-2"></i>
+            <div class="position-relative w-50">
+              <i class="fi-dollar-sign position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <input type="number" class="form-control form-icon-start" min="10000" max="100000" step="5000"
+                     data-range-slider-max>
+            </div>
+          </div>
+        </div>
+        <div class="form-check form-switch mb-0">
+          <input type="checkbox" class="form-check-input" role="switch" id="negotiate">
+          <label for="negotiate" class="form-check-label">Negotiated price</label>
+        </div>
+      </div>
+
+      <!-- Transmission -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Transmission</h4>
+        <div class="d-flex flex-column gap-2">
+          <label class="form-check">
+            <input type="checkbox" class="form-check-input" id="auto">
+            <span class="form-check-label fs-sm">Automatic</span>
+          </label>
+          <label class="form-check">
+            <input type="checkbox" class="form-check-input" id="manual">
+            <span class="form-check-label fs-sm">Manual</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Mileage -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Mileage</h4>
+        <div class="d-flex align-items-center">
+          <input type="number" class="form-control w-50" step="5000" placeholder="From">
+          <i class="fi-minus mx-3 mx-lg-1 mx-xl-2 mx-xxl-3"></i>
+          <input type="number" class="form-control w-50" step="5000" placeholder="To">
+        </div>
+      </div>
+
+      <!-- Color -->
+      <div class="pb-4 mb-2 mb-xl-3">
+        <h4 class="h6">Color</h4>
+        <div data-simplebar data-simplebar-auto-hide="false">
+          <div class="d-flex flex-column gap-2 py-1">
+            <label class="form-check"><input class="form-check-input" type="checkbox"> <span class="form-check-label fs-sm">White</span></label>
+            <label class="form-check"><input class="form-check-input" type="checkbox"> <span class="form-check-label fs-sm">Black</span></label>
+            <label class="form-check"><input class="form-check-input" type="checkbox"> <span class="form-check-label fs-sm">Silver</span></label>
+            <label class="form-check"><input class="form-check-input" type="checkbox"> <span class="form-check-label fs-sm">Blue</span></label>
+            <label class="form-check"><input class="form-check-input" type="checkbox"> <span class="form-check-label fs-sm">Red</span></label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</aside>

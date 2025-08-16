@@ -1,13 +1,12 @@
 from django.conf import settings
-from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.urls import reverse
 
 from .choices_types import (
-    SenegalRegion, Transmission, FuelType, BodyType, CarColor, COLOR_HEX_BY_VALUE
+    SenegalRegion, Transmission, FuelType, BodyType, CarColor, COLOR_HEX_BY_VALUE, CarYear, CarSeat, CarDoor
 )
 
 import os, uuid
@@ -26,9 +25,11 @@ def car_photo_upload_to(instance, filename):
     return f"cars/{instance.car_id}/photos/{timezone.now():%Y/%m}/{uuid.uuid4().hex}{ext}"
 
 
+
 class City(models.Model):
-    name = models.CharField(max_length=80, unique=True, db_index=True)
+    name = models.CharField(max_length=80, unique=True, db_index=True, blank=True, null=True)
     slug = models.SlugField(max_length=80, unique=True, editable=False)
+    region = models.CharField(max_length=20, choices=SenegalRegion.choices, default=SenegalRegion.DAKAR)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -64,7 +65,6 @@ class Place(models.Model):
         return f"{self.city}, {self.region} (SN)"
 
     def save(self, *args, **kwargs):
-        # Sécurité : on force le pays à 'SN' quoi qu’il arrive.
         self.country = "SN"
         super().save(*args, **kwargs)
 
@@ -85,7 +85,7 @@ class Brand(models.Model):
 
 class CarModel(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="models")
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         ordering = ["brand__name", "name"]
@@ -100,13 +100,13 @@ class Car(models.Model):
     title = models.CharField(max_length=140, help_text="Titre de l’annonce (ex: Toyota Yaris 2020 propre)")
     slug = models.SlugField(max_length=160, unique=True, editable=False)
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="cars", verbose_name="cars_brand")
-    model_name = models.ForeignKey(CarModel, on_delete=models.PROTECT, related_name="cars_models", verbose_name="Modèle")
-    year = models.PositiveIntegerField(validators=[MinValueValidator(2010), MaxValueValidator(current_year_plus_one)])
-    body_type = models.CharField(max_length=12, choices=BodyType.choices, default=BodyType.CITY_CAR)
+    model_name = models.ForeignKey(CarModel, on_delete=models.PROTECT, related_name="cars_models", verbose_name="Modèle", blank=True, null=True)
+    year = models.PositiveIntegerField(choices=CarYear, default=2024)
+    body_type = models.CharField(max_length=12, choices=BodyType.choices, default=BodyType.CITY_CAR, blank=True, null=True)
     transmission = models.CharField(max_length=10, choices=Transmission.choices, default=Transmission.MANUAL)
     fuel_type = models.CharField(max_length=10, choices=FuelType.choices, default=FuelType.GASOLINE)
-    seats = models.PositiveSmallIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(20)])
-    doors = models.PositiveSmallIntegerField(default=4, validators=[MinValueValidator(2), MaxValueValidator(4)])
+    seats = models.CharField(choices=CarSeat.choices, default=CarSeat.TWO)
+    doors = models.CharField(choices=CarDoor.choices, default=CarDoor.TWO)
     mileage_km = models.PositiveIntegerField(choices=MILEAGE_CHOICES, default=10000)
     color = models.CharField(max_length=10, choices=CarColor.choices, default=CarColor.WHITE)
     description = models.TextField(blank=True)
@@ -131,11 +131,11 @@ class Car(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.brand} {self.model_name} {self.year} — {self.owner}"
+        return f"{self.brand} {self.year} — {self.owner}"
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base = slugify(f"{self.title}-{self.brand}-{self.model_name}-{self.year}")
+            base = slugify(f"{self.title}-{self.brand}-{self.year}")
             base = base[:150]
             self.slug = f"{base}-{uuid.uuid4().hex[:6]}"
         super().save(*args, **kwargs)
@@ -148,13 +148,17 @@ class Car(models.Model):
     def color_hex(self) -> str:
         return COLOR_HEX_BY_VALUE.get(self.color, COLOR_HEX_BY_VALUE.get("other", "#9e9e9e"))
 
+    # cars/<uuid:pk>/<slug:slug>/
     def get_absolute_url(self):
-        return reverse("car_detail", args=[self.pk])
+        return reverse("car_detail", kwargs={"slug": self.slug})
 
-    def clean(self):
-        super().clean()
-        if self.model_name and self.brand and self.model_name.brand_id != self.brand_id:
-            raise ValidationError({"model_name": "Ce modèle n’appartient pas à la marque sélectionnée."})
+    def get_absolute_url_update(self):
+        return reverse("car_update", kwargs={"slug": self.slug})
+
+    def get_absolute_url_delete(self):
+        return reverse("car_delete", kwargs={"slug": self.slug})
+
+
 
 
 class CarFeature(models.Model):
@@ -199,3 +203,31 @@ class CarPhoto(models.Model):
         super().save(*args, **kwargs)
         if self.is_cover:
             CarPhoto.objects.filter(car=self.car).exclude(pk=self.pk).update(is_cover=False)
+
+
+class Favorite(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    slug = models.SlugField(max_length=160, unique=True, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorite_links")
+    car  = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="favorite_links")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "car"], name="uniq_user_car_fav")
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.car} ({self.created_at})"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            title = ""
+            try:
+                if getattr(self, "car_id", None):
+                    title = (self.car.title or "").strip()
+            except Exception:
+                pass
+            base = slugify(title) or "favori"
+            self.slug = f"{base}-{uuid.uuid4().hex[:6]}"
+        super().save(*args, **kwargs)

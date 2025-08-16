@@ -1,0 +1,274 @@
+{% extends "layout.html" %}
+{% load static humanize %}
+
+{% block title %}{{ car.title }}{% endblock %}
+
+{% block content %}
+<main class="content-wrapper">
+
+  <section class="container pt-4 pb-5 mb-xxl-3">
+
+    <!-- Breadcrumb -->
+    <nav class="pb-2" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'cars_list' %}">Voitures</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ car.brand }} {{ car.model_name }}</li>
+      </ol>
+    </nav>
+
+    <!-- Title + Share -->
+    <div class="d-flex justify-content-between gap-3 position-relative z-2 mb-3 mb-lg-4">
+      <h1 class="mb-0">
+        {{ car.brand }} {{ car.model_name }}
+        <span class="fs-xl fw-normal text-body-secondary align-middle">({{ car.year }})</span>
+      </h1>
+      <div class="d-flex gap-2">
+        <div class="dropdown" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-sm" title="Partager">
+          <button type="button" class="btn btn-icon btn-ghost btn-secondary animate-scale rounded-circle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Share">
+            <i class="fi-share-2 animate-target fs-base"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="--fn-dropdown-min-width: 9.5rem">
+            <li><a class="dropdown-item" href="#!"><i class="fi-facebook fs-base me-2"></i>Facebook</a></li>
+            <li><a class="dropdown-item" href="#!"><i class="fi-instagram fs-base me-2"></i>Instagram</a></li>
+            <li><a class="dropdown-item" href="#!"><i class="fi-linkedin fs-base me-2"></i>LinkedIn</a></li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-icon btn-secondary animate-pulse rounded-circle" title="Wishlist" aria-label="Wishlist">
+          <i class="fi-heart animate-target fs-base"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Meta (mobile) -->
+    <div class="d-lg-none mb-4">
+      <div class="d-flex align-items-center justify-content-between gap-3 pb-1 mb-2">
+        <div class="h2 mb-0">{{ car.daily_price|intcomma }} F / jour</div>
+        <div class="d-flex gap-2 mb-3">
+          {% if car.is_featured %}<span class="badge text-bg-info d-inline-flex align-items-center">En avant<i class="fi-shield ms-1"></i></span>{% endif %}
+          <span class="badge text-bg-warning">Occasion</span>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 gap-sm-3 fs-sm text-nowrap">
+        <div class="d-flex align-items-center gap-2 me-2"><i class="fi-map-pin"></i>{{ car.place.city.name }}, {{ car.place.region }}</div>
+        <div class="d-flex align-items-center gap-2 me-2"><i class="fi-tachometer"></i>{{ car.mileage_km|intcomma }} km</div>
+        <div class="d-flex align-items-center gap-2 me-2"><i class="fi-gas-pump"></i>{{ car.get_fuel_type_display }}</div>
+        <div class="d-flex align-items-center gap-2"><i class="fi-gearbox"></i>{{ car.get_transmission_display }}</div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <!-- Galerie + Description -->
+      <div class="col-lg-8 pb-3 pb-sm-0 mb-4 mb-sm-5 mb-lg-0">
+
+        <!-- Slider principal -->
+        <div class="swiper hover-effect-opacity" data-swiper='{"spaceBetween":16,"loop":true,
+  "navigation":{"prevEl":".btn-prev","nextEl":".btn-next"},"thumbs":{"swiper":"#thumbs"}}'>
+  <div class="swiper-wrapper">
+    {% if photos %}
+      {% for p in photos %}
+        <div class="swiper-slide">
+          <div class="ratio bg-body-tertiary rounded overflow-hidden" style="--fn-aspect-ratio: calc(482 / 856 * 100%)">
+            {% if p.image and p.image.name %}
+              <img src="{{ p.image.url }}" alt="{{ p.caption|default:'Image' }}" class="w-100 h-100 object-fit-cover">
+            {% else %}
+              <img src="{% static 'img/placeholders/car-16x9.jpg' %}" alt="No image" class="w-100 h-100 object-fit-cover">
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="swiper-slide">
+        <div class="ratio bg-body-tertiary rounded overflow-hidden" style="--fn-aspect-ratio: calc(482 / 856 * 100%)">
+          <img src="{% static 'img/placeholders/car-16x9.jpg' %}" alt="No image" class="w-100 h-100 object-fit-cover">
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="position-absolute top-50 start-0 z-2 translate-middle-y ms-3 ms-sm-4">
+    <button type="button" class="btn btn-prev btn-icon btn-secondary bg-body border-0 rounded-circle" aria-label="Prev" data-bs-theme="light">
+      <i class="fi-chevron-left fs-lg"></i>
+    </button>
+  </div>
+  <div class="position-absolute top-50 end-0 z-2 translate-middle-y me-3 me-sm-4">
+    <button type="button" class="btn btn-next btn-icon btn-secondary bg-body border-0 rounded-circle" aria-label="Next" data-bs-theme="light">
+      <i class="fi-chevron-right fs-lg"></i>
+    </button>
+  </div>
+</div>
+
+        <!-- Vignettes -->
+        <div class="swiper swiper-load swiper-thumbs pt-2 mt-1" id="thumbs"
+     data-swiper='{"loop":true,"spaceBetween":16,"slidesPerView":3,"watchSlidesProgress":true,
+     "breakpoints":{"340":{"slidesPerView":4},"500":{"slidesPerView":5},
+                    "600":{"slidesPerView":6},"768":{"slidesPerView":4},
+                    "992":{"slidesPerView":5},"1200":{"slidesPerView":5}}}'>
+  <div class="swiper-wrapper">
+    {% if photos %}
+      {% for p in photos|slice:":8" %}
+        <div class="swiper-slide swiper-thumb overflow-hidden">
+          <div class="ratio bg-body-tertiary" style="--fn-aspect-ratio: calc(115 / 156 * 100%)">
+            {% if p.image and p.image.name %}
+              <img src="{{ p.image.url }}" class="swiper-thumb-img w-100 h-100 object-fit-cover"
+                   alt="{{ p.caption|default:'Thumbnail' }}">
+            {% else %}
+              <img src="{% static 'img/placeholders/car-1x1.jpg' %}" class="swiper-thumb-img w-100 h-100 object-fit-cover" alt="No thumb">
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="swiper-slide swiper-thumb overflow-hidden">
+        <div class="ratio bg-body-tertiary" style="--fn-aspect-ratio: calc(115 / 156 * 100%)">
+          <img src="{% static 'img/placeholders/car-1x1.jpg' %}" class="swiper-thumb-img w-100 h-100 object-fit-cover" alt="No thumb">
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+        <!-- Specifications -->
+        <h2 class="h3 pt-5 mt-sm-2 my-lg-4">Caractéristiques</h2>
+        <div class="row row-cols-1 row-cols-sm-2 gy-2">
+          <div class="col">
+            <ul class="list-unstyled text-body-secondary mt-n1 mb-0">
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Année:</span> {{ car.year }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Kilométrage:</span> {{ car.mileage_km|intcomma }} km</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Carrosserie:</span> {{ car.get_body_type_display }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Transmission:</span> {{ car.get_transmission_display }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Carburant:</span> {{ car.get_fuel_type_display }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Couleur:</span> {{ car.get_color_display }}</li>
+            </ul>
+          </div>
+          <div class="col">
+            <ul class="list-unstyled text-body-secondary mt-n1 mb-0">
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Places:</span> {{ car.seats }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Portes:</span> {{ car.doors }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Ville:</span> {{ car.place.city.name }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Région:</span> {{ car.place.region }}</li>
+              <li class="mt-1"><span class="fw-medium text-dark-emphasis me-1">Prix / jour:</span> {{ car.daily_price|intcomma }} F</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Description -->
+        {% if car.description %}
+          <h2 class="h3 pt-5 mt-sm-2">Description</h2>
+          <p>{{ car.description|linebreaksbr }}</p>
+        {% endif %}
+
+        <div class="d-flex fs-sm text-body-secondary border-top pt-4 mt-4 mt-md-5">
+          <div>Publiée&nbsp;: <span class="text-dark-emphasis">{{ car.created_at|date:"d/m/Y" }}</span></div>
+          <hr class="vr my-1 mx-3">
+          <div>ID&nbsp;: <span class="text-dark-emphasis">{{ car.pk }}</span></div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="col-lg-4" style="margin-top: -110px">
+        <div class="position-sticky top-0" style="padding-top: 110px">
+
+          <div class="d-none d-lg-block">
+            <div class="d-flex gap-2 pb-1 mb-2">
+              {% if car.is_featured %}<span class="badge text-bg-info d-inline-flex align-items-center">En avant<i class="fi-shield ms-1"></i></span>{% endif %}
+              <span class="badge text-bg-warning">Voiture vérifiée</span>
+            </div>
+            <div class="h2 pb-1 mb-2">{{ car.daily_price|intcomma }} F / jour</div>
+            <div class="d-flex flex-wrap justify-content-lg-between gap-2 fs-sm text-nowrap mb-4">
+              <div class="d-flex align-items-center gap-2 me-2"><i class="fi-map-pin"></i>{{ car.place.city.name }}</div>
+              <div class="d-flex align-items-center gap-2 me-2"><i class="fi-tachometer"></i>{{ car.mileage_km|intcomma }} km</div>
+              <div class="d-flex align-items-center gap-2 me-2"><i class="fi-gas-pump"></i>{{ car.get_fuel_type_display }}</div>
+              <div class="d-flex align-items-center gap-2"><i class="fi-gearbox"></i>{{ car.get_transmission_display }}</div>
+            </div>
+          </div>
+
+          <!-- Vendeur -->
+          <div class="card bg-body-tertiary border-0 p-sm-2 p-lg-0 p-xl-2 mb-4">
+            <div class="card-body">
+              <div class="d-flex align-items-center position-relative mb-3">
+                <div class="ratio ratio-1x1 flex-shrink-0 bg-body-secondary rounded-circle overflow-hidden" style="width: 72px">
+                  <img src="{{ car.owner.profile.image.url }}" alt="Avatar">
+                </div>
+                <div class="w-100 ps-3">
+                  <div class="d-flex align-items-center justify-content-between gap-3 mb-1">
+                    <span class="h6 fs-sm mb-0">{{ car.owner.first_name }} {{ car.owner.last_name }}</span>
+                    <span class="badge text-bg-light">Propriétaire</span>
+                  </div>
+                  <div class="fs-xs text-body-secondary">{{ car.owner.email }}</div>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-3">
+                <a class="btn btn-primary" href="mailto:{{ car.owner.email }}"><i class="fi-mail fs-base me-2"></i>Contacter</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Similaires (même région) -->
+  <section class="container py-2 py-sm-3 py-md-4 py-lg-5 my-xxl-3">
+    <div class="d-flex align-items-start justify-content-between gap-4 pb-3 mb-2 mb-sm-3">
+      <h2 class="mb-0">Annonces similaires ({{ car.place.region }})</h2>
+      <div class="nav">
+        <a class="nav-link position-relative text-nowrap py-1 px-0" href="{% url 'cars_list' %}">
+          <span class="hover-effect-underline stretched-link me-1">Voir tout</span>
+          <i class="fi-chevron-right fs-lg"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="swiper pb-5" data-swiper='{"slidesPerView":1,"spaceBetween":24,"pagination":{"el":".swiper-pagination","clickable":true},"breakpoints":{"550":{"slidesPerView":2},"850":{"slidesPerView":3},"1200":{"slidesPerView":4}}}'>
+      <div class="swiper-wrapper">
+        {% for c in similar_cars %}
+        <div class="swiper-slide h-auto">
+          <article class="card h-100 hover-effect-scale bg-body-tertiary border-0">
+            <div class="card-img-top position-relative overflow-hidden">
+              <div class="ratio hover-effect-target bg-body-tertiary" style="--fn-aspect-ratio: calc(204 / 306 * 100%)">
+                {% with cp=c.cover_photo %}
+                  {% if cp %}
+                    <img src="{{ cp.image.url }}" class="w-100 h-100 object-fit-cover" alt="{{ c }}">
+                  {% else %}
+                    <img src="{% static 'img/placeholders/car-4x3.jpg' %}" class="w-100 h-100 object-fit-cover" alt="{{ c }}">
+                  {% endif %}
+                {% endwith %}
+              </div>
+            </div>
+            <div class="card-body pb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="fs-xs text-body-secondary me-3">{{ c.created_at|date:"d/m/Y" }}</div>
+              </div>
+              <h3 class="h6 mb-2">
+                <a class="hover-effect-underline stretched-link me-1" href="{{ c.get_absolute_url }}">
+                  {{ c.brand }} {{ c.model_name }}
+                </a>
+                <span class="fs-xs fw-normal text-body-secondary">({{ c.year }})</span>
+              </h3>
+              <div class="h6 mb-0">{{ c.daily_price|intcomma }} F / jour</div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+              <div class="border-top pt-3">
+                <div class="row row-cols-2 g-2 fs-sm">
+                  <div class="col d-flex align-items-center gap-2"><i class="fi-map-pin"></i>{{ c.place.city.name }}</div>
+                  <div class="col d-flex align-items-center gap-2"><i class="fi-tachometer"></i>{{ c.mileage_km|intcomma }} km</div>
+                  <div class="col d-flex align-items-center gap-2"><i class="fi-gas-pump"></i>{{ c.get_fuel_type_display }}</div>
+                  <div class="col d-flex align-items-center gap-2"><i class="fi-gearbox"></i>{{ c.get_transmission_display }}</div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+        {% empty %}
+          <p class="text-body-secondary">Aucune annonce similaire pour le moment.</p>
+        {% endfor %}
+      </div>
+      <div class="swiper-pagination position-static mt-3 mt-lg-4"></div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

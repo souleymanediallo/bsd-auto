@@ -77,6 +77,16 @@ class ProfileUpdateForm(forms.ModelForm):
             "image": "Photo de profil",
             "description": "Description de votre profile",
         }
+        widgets = {
+            "image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "id": "avatar-input",
+            }),
+            "description": forms.Textarea(attrs={
+                "rows": 5,
+                "class": "form-control form-control-lg bg-transparent",
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super(ProfileUpdateForm, self).__init__(*args, **kwargs)
