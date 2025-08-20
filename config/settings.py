@@ -120,11 +120,30 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Configurations AWS S3
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+# Local development settings (optional)
+if env('DJANGO_DEVELOPMENT') == 'True':
+    STATIC_URL = '/static/'
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / "mediafiles"
+else:
+    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = 'eu-west-3'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_DEFAULT_ACL = None
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
+    # Static files (CSS, JavaScript, Images)
+    STATICFILES_STORAGE = 'utils.storages.StaticRootS3Boto3Storage'
+    STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/"
+
+    # Media files
+    DEFAULT_FILE_STORAGE = 'utils.storages.MediaRootS3Boto3Storage'
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
