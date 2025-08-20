@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     'pages.apps.PagesConfig',
     'cars.apps.CarsConfig',
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
@@ -59,6 +60,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'pages.context_processors.landing',
             ],
         },
     },
@@ -92,6 +94,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# https://pypi.org/project/django-ckeditor-5/
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading", "|", "bold", "italic", "link", "bulletedList", "numberedList",
+            "|", "blockQuote", "insertTable", "undo", "redo", "|", "imageUpload"
+        ],
+        'language': 'fr',
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

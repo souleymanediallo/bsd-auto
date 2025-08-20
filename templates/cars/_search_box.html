@@ -1,0 +1,15 @@
+<form method="get" action="{% url 'cars_search' %}" class="p-sm-2" data-bs-theme="light">
+  <div class="row row-cols-1 row-cols-md-2 g-3">
+    <div class="col-md-5">
+      {{ form.body_type }}
+    </div>
+    <div class="col-md-5">
+      {{ form.region }}
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-dark w-100 bt-xl">
+        <i class="fi-search fs-base me-2 ms-n1 fw-bold"></i>{{ submit_label }}
+      </button>
+    </div>
+  </div>
+</form>

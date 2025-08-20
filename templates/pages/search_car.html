@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+{% load static humanize car_search %}
+{% block title %}Liste des voitures de location{% endblock %}
+
+{% block content %}
+<main class="content-wrapper">
+  <div class="container pt-4 pb-5 mb-xxl-3">
+
+    <!-- Breadcrumb -->
+    <nav class="pb-2" aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Voitures</li>
+      </ol>
+    </nav>
+
+    <!-- Barre de recherche en haut -->
+    <div class="bg-white rounded p-3 p-sm-4 mb-4">
+      {% url 'cars_list' as cars_list_url %}
+      {% car_search_box action_url=cars_list_url submit_label="Rechercher" %}
+    </div>
+
+    {% car_search_context paginate=1 per_page=12 as search %}
+    {% with cars=search.cars page_obj=search.page_obj is_paginated=search.is_paginated %}
+
+    <!-- Bandeau compteur + reset -->
+    <div class="d-flex align-items-center gap-3 border-bottom pb-2 mb-4">
+      <div class="fs-sm text-nowrap pb-3">
+        <span class="d-none d-md-inline">Affichage de</span>
+        {% if page_obj %}
+        {{ page_obj.paginator.count }}
+      {% else %}
+        {{ cars|length }}
+      {% endif %} résultats
+      </div>
+      <div class="w-100 pb-3 overflow-x-auto">
+        <div class="d-flex gap-2">
+          {% if search.body_type_label %}
+            <span class="badge text-bg-light border">Catégorie&nbsp;: {{ search.body_type_label }}</span>
+          {% endif %}
+          {% if search.region_label %}
+            <span class="badge text-bg-light border">Région&nbsp;: {{ search.region_label }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="nav pb-3">
+        <a class="nav-link fs-xs text-decoration-underline text-nowrap p-0" href="{% url 'cars_list' %}">Réinitialiser</a>
+      </div>
+    </div>
+
+    <div class="row pt-md-2 pt-lg-3 pb-2 pb-sm-3 pb-md-4 pb-lg-5">
+
+      <!-- Sidebar filtres (si tu en as un) -->
+      {% include "partials/sidebar-car.html" %}
+
+      <!-- Listings grid -->
+      <div class="col-lg-9">
+
+        <!-- En-tête tri / vue (placeholder) -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3 pb-3 mb-2">
+          <div class="position-relative" style="width: 150px">
+            <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2"></i>
+            <select class="form-select border-0 rounded-0 ps-4 pe-1">
+              <option value="newest" selected>Nouveautés</option>
+              <option value="price_low">Prix ↑</option>
+              <option value="price_high">Prix ↓</option>
+            </select>
+          </div>
+          <div class="nav ms-auto">
+            <a class="nav-link fw-normal p-0" href="#!">
+              <i class="fi-repeat fs-base me-2"></i>
+              Comparer (0)
+            </a>
+          </div>
+          <div class="nav">
+            <a class="nav-link fs-xl text-body-secondary py-0 px-2 active pe-none" href="#" aria-label="Grille">
+              <i class="fi-grid"></i>
+            </a>
+            <a class="nav-link fs-xl text-body-secondary py-0 px-2" href="#" aria-label="Liste">
+              <i class="fi-list"></i>
+            </a>
+          </div>
+        </div>
+
+        {% if search.no_results %}
+          <div class="alert alert-warning">
+            {% if search.body_type_label and search.region_label %}
+              Désolé, aucune <strong>{{ search.body_type_label }}</strong> n’est disponible à
+              <strong>{{ search.region_label }}</strong> pour le moment.
+            {% elif search.body_type_label %}
+              Désolé, aucune <strong>{{ search.body_type_label }}</strong> n’est disponible pour le moment.
+            {% elif search.region_label %}
+              Désolé, aucune voiture n’est disponible à <strong>{{ search.region_label }}</strong> pour le moment.
+            {% else %}
+              Aucune voiture ne correspond à ces critères.
+            {% endif %}
+          </div>
+
+          {% if search.suggest_same_region %}
+            <h3 class="h5 mt-4 mb-3">Voitures disponibles à {{ search.region_label }}</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 g-sm-3 g-lg-4">
+              {% for car in search.suggest_same_region %}
+                <div class="col">
+                  {% include "cars/_car_card.html" with car=car %}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if search.suggest_same_body %}
+            <h3 class="h5 mt-4 mb-3">{{ search.body_type_label }} disponibles ailleurs au Sénégal</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 g-sm-3 g-lg-4">
+              {% for car in search.suggest_same_body %}
+                <div class="col">
+                  {% include "cars/_car_card.html" with car=car %}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        {% else %}
+          <!-- Résultats -->
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-2 row-cols-xl-3 g-4 g-sm-3 g-lg-4">
+            {% for car in cars %}
+              <div class="col">
+                {% include "cars/_car_card.html" with car=car %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Pagination -->
+          {% if is_paginated and page_obj %}
+          <nav class="pt-3 mt-3" aria-label="Pagination">
+            <ul class="pagination pagination-lg">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                  <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                  <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    {% endwith %}
+  </div>
+</main>
+{% endblock %}

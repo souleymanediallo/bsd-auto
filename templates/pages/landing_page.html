@@ -1,0 +1,363 @@
+{% extends "layout.html" %}
+{% load static humanize %}
+
+{% block title %}{{ page.meta_title|default:page.title }}{% endblock %}
+
+{# Meta SEO optionnel si ton layout expose ce block #}
+{% block extra_head %}
+  {% if page.meta_description %}
+    <meta name="description" content="{{ page.meta_description }}">
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<main class="content-wrapper" style="background-color: #f8f9fa;">
+  {# ====== Conteneur principal ====== #}
+  <div class="container pt-4 pt-sm-5 pb-5 mt-2 mt-sm-0 mt-lg-2 mb-2 mb-md-3 mb-lg-4 mb-xl-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+
+        {# ====== En-tête dynamique ====== #}
+        <h1 class="h2 pb-2 pb-sm-3 pb-lg-4">
+          {{ page.title }}
+        </h1>
+        <hr class="mt-0">
+
+        {# ====== Contenu éditorial (affiché pour toutes les pages s’il existe) ====== #}
+        {% if page.content %}
+          <div class="prose my-3">
+            {{ page.content|safe }}
+          </div>
+          <hr class="my-4 my-lg-5">
+        {% endif %}
+
+        {# ====== Liste des voitures (toutes sauf STATIC) ====== #}
+        {% if cars %}
+          {# Sous-titre contextuel #}
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h5 mb-0">
+              {% if page.kind == "DESTINATION" and page.city %}
+                Voitures à {{ page.city.name }}
+              {% elif page.kind == "REGION" and page.region %}
+                Voitures – Région {{ page.get_region_display }}
+              {% elif page.kind == "CATEGORY" and page.body_type %}
+                Voitures – {{ page.get_body_type_display }}
+              {% else %}
+                Résultats
+              {% endif %}
+            </h2>
+            <span class="text-body-secondary">{{ cars|length }} résultats</span>
+          </div>
+
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            {% for car in cars %}
+              <div class="col">
+                <article class="card h-100 hover-effect-scale">
+                  <div class="card-img-top position-relative overflow-hidden">
+                    <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 pt-sm-0 ps-1 ps-sm-0 mt-2 mt-sm-3 ms-2 ms-sm-3">
+                      {% if car.is_featured %}
+                        <span class="badge text-bg-info d-inline-flex align-items-center">
+                          Verified <i class="fi-shield ms-1"></i>
+                        </span>
+                      {% endif %}
+                    </div>
+
+                    <div class="ratio hover-effect-target bg-body-tertiary" style="--fn-aspect-ratio: calc(204 / 306 * 100%)">
+                      {% with cover=car.cover_photo %}
+                        {% if cover and cover.image %}
+                          <img src="{{ cover.image.url }}" alt="{{ car.title }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                          <img src="{% static 'assets/img/placeholders/car-16x9.jpg' %}" alt="{{ car.title }}" class="w-100 h-100 object-fit-cover">
+                        {% endif %}
+                      {% endwith %}
+                    </div>
+
+                    <div class="position-absolute top-0 end-0 z-1 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                      <form method="post" action="{% url 'favorite_toggle' car.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle"
+                                title="{% if car.is_favorite %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+                          {% if car.is_favorite %}
+                            <i class="fi-heart-filled text-danger fs-sm"></i>
+                          {% else %}
+                            <i class="fi-heart fs-sm"></i>
+                          {% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div class="card-body pb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="fs-xs text-body-secondary me-3">{{ car.created_at|date:"d/m/Y" }}</div>
+                    </div>
+
+                    <h3 class="h6 mb-2">
+                      <a class="hover-effect-underline stretched-link me-1" href="{{ car.get_absolute_url }}">
+                        {{ car.brand.name }} {{ car.model_name.name }}
+                      </a>
+                      <span class="fs-xs fw-normal text-body-secondary">
+                        ({{ car.year }})
+                      </span>
+                    </h3>
+
+                    <div class="h6 mb-0">{{ car.daily_price|floatformat:0|intcomma }} F</div>
+                  </div>
+
+                  <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+                    <div class="border-top pt-3">
+                      <div class="row row-cols-2 g-2 fs-sm">
+                        <div class="col d-flex align-items-center gap-2">
+                          <i class="fi-map-pin"></i>
+                          {{ car.place.city.name }}
+                        </div>
+                        <div class="col d-flex align-items-center gap-2">
+                          <i class="fi-tachometer"></i>
+                          {{ car.mileage_km|intcomma }} km
+                        </div>
+                        <div class="col d-flex align-items-center gap-2">
+                          <i class="fi-gas-pump"></i>
+                          {{ car.get_fuel_type_display }}
+                        </div>
+                        <div class="col d-flex align-items-center gap-2">
+                          <i class="fi-gearbox"></i>
+                          {{ car.get_transmission_display }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            {% endfor %}
+          </div>
+
+        {% elif page.kind != "STATIC" %}
+          <p class="text-body-secondary mt-3 mb-0">
+            Aucune annonce disponible pour cette page pour le moment.
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- pub optionnelle -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm">
+              <img src="{% static 'assets/img/ads/pub-pequinze.gif' %}" class="card-img-top-" alt="Publicité">
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-8">
+         <!-- ====== FAQ (optionnelle) ====== -->
+        {% if page.kind != "STATIC" %}
+              <div class="accordion" id="faq">
+
+        <!-- 1 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-1">
+            <button type="button" class="accordion-button hover-effect-underline" data-bs-toggle="collapse" data-bs-target="#faqCollapse-1" aria-expanded="true" aria-controls="faqCollapse-1">
+              <span class="me-2">Comment fonctionne la location entre particuliers sur BSD Auto&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse show" id="faqCollapse-1" aria-labelledby="faqHeading-1" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <ol class="mb-0">
+                <li><strong>Réservation</strong> : choisissez une voiture et envoyez votre demande en ligne.</li>
+                <li><strong>Validation</strong> : le propriétaire reçoit la demande ; notre équipe peut vous appeler pour affiner lieu/horaires.</li>
+                <li><strong>Mise en relation</strong> : une fois acceptée, vous échangez pour finaliser la remise des clés.</li>
+                <li><strong>Remise du véhicule</strong> : vérifications, signature du contrat, puis paiement sur place.</li>
+                <li><strong>Après location</strong> : restituez la voiture, puis laissez un avis pour aider la communauté.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-2">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-2" aria-expanded="false" aria-controls="faqCollapse-2">
+              <span class="me-2">Quelles sont les conditions pour louer une voiture&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-2" aria-labelledby="faqHeading-2" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <ul class="mb-0">
+                <li>Être âgé d’au moins <strong>25 ans</strong>.</li>
+                <li>Détenir un <strong>permis de conduire</strong> valable depuis <strong>3 ans</strong> minimum.</li>
+                <li>Présenter une <strong>pièce d’identité</strong> (CNI ou passeport) correspondant au permis.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-3">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-3" aria-expanded="false" aria-controls="faqCollapse-3">
+              <span class="me-2">Quels documents dois-je apporter le jour J&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-3" aria-labelledby="faqHeading-3" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <ul class="mb-0">
+                <li>Permis de conduire original.</li>
+                <li>Carte d’identité ou passeport.</li>
+                <li>Votre numéro de réservation BSD Auto.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-4">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-4" aria-expanded="false" aria-controls="faqCollapse-4">
+              <span class="me-2">Comment se passent le paiement et la caution&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-4" aria-labelledby="faqHeading-4" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-2">Le <strong>paiement s’effectue lors de la remise des clés</strong>, après vérification du véhicule.</p>
+              <ul class="mb-0">
+                <li><strong>Aucun acompte</strong> n’est requis dans la majorité des cas.</li>
+                <li><strong>Pas de caution</strong> sauf mention contraire dans l’annonce.</li>
+                <li>Pour les réservations très anticipées (&gt; 6 mois), certains propriétaires peuvent demander
+                    un <strong>acompte max. 10&nbsp;%</strong> pour bloquer la date.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-5">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-5" aria-expanded="false" aria-controls="faqCollapse-5">
+              <span class="me-2">Quelle assurance est incluse dans le prix&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-5" aria-labelledby="faqHeading-5" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-2">Chaque véhicule proposé sur BSD Auto est couvert au minimum par une <strong>assurance responsabilité civile (au tiers)</strong>.</p>
+              <ul class="mb-2">
+                <li>Elle couvre les dommages causés aux tiers lorsque vous êtes responsable.</li>
+                <li>Les réparations du véhicule loué restent à votre charge, sauf garantie supérieure mentionnée.</li>
+              </ul>
+              <p class="mb-0">Le jour J, vérifiez toujours l’<strong>attestation d’assurance</strong> et la <strong>carte grise</strong> avec le propriétaire.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-6">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-6" aria-expanded="false" aria-controls="faqCollapse-6">
+              <span class="me-2">Le kilométrage est-il limité&nbsp;? Puis-je rouler partout au Sénégal&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-6" aria-labelledby="faqHeading-6" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-2">
+                Sauf indication contraire dans l’annonce, le <strong>kilométrage est illimité</strong>. Informez
+                le propriétaire si vous prévoyez un long trajet (ex. Kédougou, Ziguinchor), car le <strong>tarif
+                peut varier</strong> selon la distance, l’état des routes et le coût d’assistance.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-7">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-7" aria-expanded="false" aria-controls="faqCollapse-7">
+              <span class="me-2">Livrez-vous les véhicules à l’aéroport AIBD ou à domicile&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-7" aria-labelledby="faqHeading-7" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-0">
+                Oui, la <strong>livraison à l’Aéroport International Blaise Diagne (AIBD)</strong> et en ville
+                (hôtel, domicile) est possible selon l’annonce, souvent à un <strong>coût inférieur</strong>
+                à un transfert privé. Le prix exact est indiqué ou confirmé lors de la réservation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-8">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-8" aria-expanded="false" aria-controls="faqCollapse-8">
+              <span class="me-2">Carburant, propreté et retards&nbsp;: quelles règles&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-8" aria-labelledby="faqHeading-8" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <ul class="mb-0">
+                <li><strong>Carburant</strong> : rendez la voiture au <strong>même niveau</strong> qu’au départ (pensez à la photo du compteur).</li>
+                <li><strong>Propreté</strong> : des frais de nettoyage peuvent s’appliquer en cas de retour très sale.</li>
+                <li><strong>Retards</strong> : prévenez le propriétaire ; des frais supplémentaires peuvent être dus.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-9">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-9" aria-expanded="false" aria-controls="faqCollapse-9">
+              <span class="me-2">Quelles vérifications faire avant de partir&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-9" aria-labelledby="faqHeading-9" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <ul class="mb-0">
+                <li>Papiers&nbsp;: carte grise, assurance en cours, contrôle technique.</li>
+                <li>État&nbsp;: pneus, niveaux (huile/liquide), éclairage, ceintures, climatisation.</li>
+                <li>Sécurité&nbsp;: triangle, gilet, roue de secours.</li>
+                <li>Constat visuel & photos des rayures/impacts + <strong>kilométrage</strong> + <strong>niveau carburant</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-10">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-10" aria-expanded="false" aria-controls="faqCollapse-10">
+              <span class="me-2">Que faire en cas de panne ou d’accident&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-10" aria-labelledby="faqHeading-10" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-2">Contactez immédiatement le propriétaire et BSD Auto. Nous aidons pour le constat, l’assistance et, si besoin, un <strong>véhicule de remplacement</strong> de gamme équivalente.</p>
+              <p class="mb-0">La prise en charge exacte dépend de l’assurance et des conditions de l’annonce.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 11 -->
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="faqHeading-11">
+            <button type="button" class="accordion-button hover-effect-underline collapsed" data-bs-toggle="collapse" data-bs-target="#faqCollapse-11" aria-expanded="false" aria-controls="faqCollapse-11">
+              <span class="me-2">Annulation ou modification de réservation&nbsp;: comment ça se passe&nbsp;?</span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" id="faqCollapse-11" aria-labelledby="faqHeading-11" data-bs-parent="#faq">
+            <div class="accordion-body">
+              <p class="mb-0">
+                Les <strong>conditions d’annulation</strong> dépendent du propriétaire et sont indiquées dans chaque annonce.
+                En cas de doute, contactez-nous&nbsp;: nous faisons le relais pour trouver la <strong>meilleure solution</strong>
+                ou vous proposer une <strong>alternative équivalente</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+        {% endif %}
+        <!-- end FAQ -->
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
