@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'cars.apps.CarsConfig',
     'django_ckeditor_5',
+    'storages',
 ]
 
 MIDDLEWARE = [
