@@ -124,7 +124,9 @@ USE_TZ = True
 # Configurations AWS S3
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 # Local development settings (optional)
-if env('DJANGO_DEVELOPMENT') == 'True':
+IS_DEV = env.bool("DJANGO_DEVELOPMENT", default=False)
+
+if IS_DEV:
     STATIC_URL = '/static/'
     STATIC_ROOT = BASE_DIR / "staticfiles"
     MEDIA_URL = '/media/'
