@@ -49,8 +49,6 @@ class CarForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Remplir les années de 2010 à l’année actuelle + 1
-        current_year = datetime.date.today().year
-        self.fields["year"].choices = [(y, y) for y in range(2010, current_year)][::-1]
         self.fields["features"].queryset = CarFeature.objects.all().order_by("name")
         # place = self.fields.get("place")
         def label_place(p: Place):

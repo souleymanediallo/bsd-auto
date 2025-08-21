@@ -101,7 +101,7 @@ class Car(models.Model):
     slug = models.SlugField(max_length=160, unique=True, editable=False)
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="cars", verbose_name="cars_brand")
     model_name = models.ForeignKey(CarModel, on_delete=models.PROTECT, related_name="cars_models", verbose_name="Modèle", blank=True, null=True)
-    year = models.PositiveIntegerField(choices=CarYear, default=2024)
+    year = models.PositiveSmallIntegerField(choices=CarYear.choices, default=CarYear.YEAR_2024)
     body_type = models.CharField(max_length=12, choices=BodyType.choices, default=BodyType.CITY_CAR, blank=True, null=True)
     transmission = models.CharField(max_length=10, choices=Transmission.choices, default=Transmission.MANUAL)
     fuel_type = models.CharField(max_length=10, choices=FuelType.choices, default=FuelType.GASOLINE)
