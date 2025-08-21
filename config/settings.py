@@ -134,14 +134,18 @@ else:
     AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = 'eu-west-3'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_QUERYSTRING_AUTH = False
     AWS_DEFAULT_ACL = None
 
-    # Static files (CSS, JavaScript, Images)
-    STATICFILES_STORAGE = 'utils.storages.StaticRootS3Boto3Storage'
-    STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/"
+    # IMPORTANT : domaine régional
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
-    # Media files
+    # Static
+    STATICFILES_STORAGE = 'utils.storages.StaticRootS3Boto3Storage'
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+
+    # Media (uploads utilisateurs)
     DEFAULT_FILE_STORAGE = 'utils.storages.MediaRootS3Boto3Storage'
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 
