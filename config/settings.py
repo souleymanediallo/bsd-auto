@@ -100,9 +100,9 @@ CKEDITOR_5_CONFIGS = {
     "default": {
         "toolbar": [
             "heading", "|", "bold", "italic", "link", "bulletedList", "numberedList",
-            "|", "blockQuote", "insertTable", "undo", "redo", "|", "imageUpload"
+            "|", "blockQuote", "insertTable", "undo", "redo", "|", "imageUpload", "|", "sourceEditing"
         ],
-        'language': 'fr',
+        "language": "fr",
     }
 }
 
